@@ -1,0 +1,15 @@
+Assunto: Boleto com vencimento em {{ vencimento }}
+Olá, {{ nome_cliente | trim('. ') }}.
+
+Identificamos que o boleto abaixo, com vencimento em {{ vencimento }}, ainda consta em aberto em nossos registros.
+
+  Valor: {{ valor }}
+  Vencimento: {{ vencimento }}
+  Linha digitável: {{ numero_boleto }}
+
+Caso já tenha efetuado o pagamento, desconsidere esta mensagem.
+
+Se tiver qualquer dúvida ou precisar de uma segunda via, é só responder a este e-mail.
+
+Atenciosamente,
+Janayna Ferreira - Coordenadora Financeira

@@ -1,0 +1,31 @@
+services:
+  recebiveis:
+    build: .
+    image: recebiveis-web:local
+    container_name: recebiveis-web
+    restart: unless-stopped
+    ports:
+      # Somente localhost: a interface nao tem login e nao deve ser exposta na rede.
+      - "127.0.0.1:8000:8000"
+    # SMTP_* e EMAIL_REMETENTE do .env viram variaveis de ambiente do container
+    # (o agente le delas). O .env nunca entra na imagem.
+    env_file:
+      - .env
+    volumes:
+      - ./entrada:/app/entrada                   # boletos (tela web e agente)
+      - ./saida:/app/saida                       # .eml gerados em dry-run
+      - ./fila_aprovacao:/app/fila_aprovacao     # e-mails aguardando aprovacao
+      - ./logs:/app/logs                         # logs JSON e relatorio.md
+      - ./templates:/app/templates:ro            # modelos dos e-mails
+      - ./docs:/app/docs:ro                      # cadastro de clientes (docs/clientes.csv)
+      - recebiveis-dados:/data                   # banco SQLite, fora do OneDrive
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  recebiveis-dados:

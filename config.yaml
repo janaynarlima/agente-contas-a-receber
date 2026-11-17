@@ -1,0 +1,49 @@
+﻿entrada: entrada
+idioma_ocr: por
+
+# Dias de aviso em relacao ao vencimento (negativo = antes, positivo = depois).
+# -7 = D-7, 1 = D+1, 3 = D+3. O dia 0 nao gera aviso.
+avisos:
+  - -7
+  - 1
+  - 3
+
+# Boletos com confianca de extracao abaixo deste valor vao para revisao.
+confianca_minima: 0.8
+
+# Avisos de vencido exigem aprovacao humana (fila_aprovacao/).
+aprovacao_vencidos: true
+
+# Enquanto false, ate o aviso D-7 passa pela aprovacao humana. So mude para
+# true depois da fase de validacao operacional.
+fase_validacao_concluida: false
+
+# Baixas acima deste percentual dos boletos abertos interrompem a execucao.
+max_percentual_baixas: 30
+
+# Limite de e-mails por execucao.
+max_envios_por_execucao: 50
+
+# Feriados (AAAA-MM-DD). Avisos que cairiam em fim de semana ou feriado sao
+# empurrados para o proximo dia util. Preencha com o calendario real.
+feriados: []
+
+# Banco SQLite local. Fica FORA do OneDrive de proposito: o sincronizador pode
+# travar ou corromper um SQLite aberto. Variaveis de ambiente sao expandidas.
+# Este e o unico local de escrita permitido fora do projeto; o caminho e
+# explicito e restrito a este arquivo (e seus arquivos auxiliares do SQLite).
+banco: "%LOCALAPPDATA%/recebiveis/estado.db"
+
+# Pastas e arquivos do fluxo de e-mail.
+saida: saida                 # .eml gerados (dry-run) ficam aqui
+fila_aprovacao: fila_aprovacao   # e-mails aguardando aprovacao humana
+logs: logs                   # logs JSON (um arquivo por dia)
+relatorio: relatorio.md     # gerado apos cada execucao
+templates: templates         # templates Jinja dos e-mails
+clientes: docs/clientes.csv  # cnpj,nome,email_cobranca (dados pessoais: nao versionar)
+
+# Copia oculta (BCC) para o financeiro. Deixe vazio para nao usar.
+bcc_financeiro: ""
+
+
+

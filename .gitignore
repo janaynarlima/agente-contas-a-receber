@@ -1,0 +1,22 @@
+.env
+entrada/
+saida/
+*.db
+*.sqlite
+*.sqlite3
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+clientes.csv
+fila_aprovacao/
+revisao/
+relatorio.md
+logs/
+
+# Dados pessoais e material de terceiros: NUNCA versionar
+materia/
+*.xlsx
+docs/clientes.*
+.claude/
+*.parte

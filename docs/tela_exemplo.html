@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recebíveis — Exemplo da tela</title>
+  <style>
+:root {
+  --fundo: #f6f7f9;
+  --cartao: #ffffff;
+  --texto: #1d2330;
+  --suave: #5d6678;
+  --borda: #dde1e8;
+  --destaque: #1f5fd1;
+  --destaque-texto: #ffffff;
+  --ok-fundo: #e5f5ea;  --ok-texto: #17622f;
+  --aviso-fundo: #fff3d9; --aviso-texto: #7a4b00;
+  --erro-fundo: #fde7e7; --erro-texto: #8f1d1d;
+  --zona: #f0f4fc;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fundo: #12151b; --cartao: #1a1f28; --texto: #e7eaf0; --suave: #9aa3b5;
+    --borda: #2b3240; --destaque: #6ea0ff; --destaque-texto: #0b1220; --zona: #1b2333;
+    --ok-fundo: #17301f; --ok-texto: #8fe0a8;
+    --aviso-fundo: #3a2e12; --aviso-texto: #f2c874;
+    --erro-fundo: #3b1c1c; --erro-texto: #f3a5a5;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fundo); color: var(--texto);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.conteudo { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+.topo { background: var(--cartao); border-bottom: 1px solid var(--borda); padding: 20px 0; }
+.topo h1 { margin: 0 0 4px; font-size: 1.5rem; }
+.topo p { margin: 0; color: var(--suave); }
+main { padding-top: 20px; padding-bottom: 8px; }
+.cartao { background: var(--cartao); border: 1px solid var(--borda); border-radius: 12px;
+  padding: 20px; margin-bottom: 16px; }
+.cartao h2 { margin: 0 0 12px; font-size: 1.1rem; }
+.cabecalho-cartao { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cabecalho-cartao h2 { margin: 0; }
+.contador { display: inline-block; min-width: 1.6em; padding: 0 8px; margin-left: 6px; border-radius: 999px;
+  background: var(--zona); color: var(--suave); font-size: .85rem; text-align: center; }
+code { font: .85em ui-monospace, Consolas, monospace; background: var(--zona); padding: 1px 6px; border-radius: 6px; }
+.oculto { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.zona { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center;
+  padding: 28px 16px; border: 2px dashed var(--borda); border-radius: 12px; background: var(--zona);
+  cursor: pointer; transition: border-color .15s, background .15s; }
+.zona:hover, .zona.sobre, .oculto:focus-visible + .lista-selecionados { border-color: var(--destaque); }
+.zona.sobre { background: color-mix(in srgb, var(--destaque) 12%, var(--zona)); }
+.dica { color: var(--suave); font-size: .9rem; }
+.lista-selecionados { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; }
+.lista-selecionados li { font-size: .92rem; color: var(--suave); }
+.opcao { display: flex; gap: 8px; align-items: center; margin: 14px 0; color: var(--suave); }
+.botao { appearance: none; border: 0; border-radius: 8px; padding: 10px 18px; font: inherit; font-weight: 600;
+  background: var(--destaque); color: var(--destaque-texto); cursor: pointer; }
+.botao:hover { filter: brightness(1.08); }
+.botao:disabled { opacity: .6; cursor: progress; }
+.botao-secundario { background: transparent; color: var(--destaque); border: 1px solid var(--destaque); }
+.processar { margin: 0; }
+.mensagens { margin-bottom: 16px; display: grid; gap: 8px; }
+.msg { margin: 0; padding: 10px 14px; border-radius: 8px; }
+.msg-ok { background: var(--ok-fundo); color: var(--ok-texto); }
+.msg-aviso { background: var(--aviso-fundo); color: var(--aviso-texto); }
+.msg-erro { background: var(--erro-fundo); color: var(--erro-texto); }
+.tabela-rolavel { overflow-x: auto; margin-top: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda); vertical-align: top; }
+th { color: var(--suave); font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+.num { text-align: right; white-space: nowrap; }
+.motivos span { display: block; color: var(--suave); font-size: .85rem; }
+.selo { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; margin-right: 4px; }
+.selo-aberto { background: var(--ok-fundo); color: var(--ok-texto); }
+.selo-pago { background: var(--zona); color: var(--suave); }
+.selo-em_revisao { background: var(--aviso-fundo); color: var(--aviso-texto); }
+.vazio { color: var(--suave); margin: 8px 0 0; }
+.cartao-aviso { border-color: var(--aviso-texto); }
+.avisos .aviso { display: block; font-size: .85rem; white-space: nowrap; color: var(--suave); }
+.avisos .aviso-enviado { color: var(--ok-texto); }
+.avisos .aviso-aguardando_aprovacao, .avisos .aviso-aprovado, .avisos .aviso-em_revisao { color: var(--aviso-texto); font-weight: 600; }
+.avisos .aviso-cancelado { text-decoration: line-through; }
+.rodape { color: var(--suave); font-size: .88rem; padding-bottom: 32px; }
+@media (max-width: 600px) { .cartao { padding: 16px; } }
+
+</style>
+  <script>
+(function () {
+  var entrada = document.getElementById("arquivos");
+  var zona = document.getElementById("zona");
+  var lista = document.getElementById("selecionados");
+  var formulario = document.getElementById("form-envio");
+  var botao = document.getElementById("botao-enviar");
+  if (!entrada || !zona) return;
+
+  function mostrar() {
+    lista.textContent = "";
+    Array.prototype.forEach.call(entrada.files, function (arquivo) {
+      var item = document.createElement("li");
+      item.textContent = arquivo.name + " (" + Math.max(1, Math.round(arquivo.size / 1024)) + " KB)";
+      lista.appendChild(item);
+    });
+  }
+
+  entrada.addEventListener("change", mostrar);
+
+  ["dragenter", "dragover"].forEach(function (nome) {
+    zona.addEventListener(nome, function (evento) {
+      evento.preventDefault();
+      zona.classList.add("sobre");
+    });
+  });
+  ["dragleave", "drop"].forEach(function (nome) {
+    zona.addEventListener(nome, function (evento) {
+      evento.preventDefault();
+      zona.classList.remove("sobre");
+    });
+  });
+  zona.addEventListener("drop", function (evento) {
+    if (evento.dataTransfer && evento.dataTransfer.files.length) {
+      entrada.files = evento.dataTransfer.files;
+      mostrar();
+    }
+  });
+
+})();
+
+</script>
+</head>
+<body>
+  <div style="background:#fff2d6;color:#7d5200;text-align:center;padding:8px 16px;font:600 .9rem system-ui">Exemplo estático com dados fictícios: os botões não enviam nada.</div>
+  <header class="topo">
+    <div class="conteudo">
+      <h1>Recebíveis</h1>
+      <p>Envie boletos para a pasta <code>entrada/</code> e acompanhe a leitura. Tudo é processado localmente; nenhum e-mail é enviado por esta tela.</p>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    
+      
+      <section class="mensagens" aria-live="polite">
+        
+          <p class="msg msg-ok">3 arquivo(s) enviado(s) para entrada/.</p>
+        
+          <p class="msg msg-ok">3 novo(s), 0 baixado(s), 0 reaberto(s).</p>
+        
+          <p class="msg msg-aviso">Sem linha digitável válida (foram para revisão): scan_horizonte.jpg</p>
+        
+      </section>
+      
+    
+
+    <section class="cartao">
+      <h2>Enviar boletos</h2>
+      <form id="form-envio" method="post" action="#" enctype="multipart/form-data">
+        <input type="hidden" name="csrf" value="exemplo">
+        <label id="zona" class="zona" for="arquivos">
+          <strong>Arraste os arquivos aqui</strong> ou clique para escolher
+          <span class="dica">Formatos: .jpeg, .jpg, .pdf, .png · até 20 MB cada</span>
+        </label>
+        <input id="arquivos" class="oculto" type="file" name="arquivos" multiple
+               accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg">
+        <ul id="selecionados" class="lista-selecionados"></ul>
+        <label class="opcao">
+          <input type="checkbox" name="processar" value="1" checked>
+          Processar (OCR e leitura da linha digitável) logo após enviar
+        </label>
+        <button id="botao-enviar" class="botao" type="submit">Enviar</button>
+      </form>
+    </section>
+
+    <section class="cartao">
+      <div class="cabecalho-cartao">
+        <h2>Arquivos em entrada/ <span class="contador">3</span></h2>
+        <form method="post" action="#" class="processar">
+          <input type="hidden" name="csrf" value="exemplo">
+          <button class="botao botao-secundario" type="submit">Processar entrada</button>
+        </form>
+      </div>
+      
+      <div class="tabela-rolavel">
+        <table>
+          <thead><tr><th>Arquivo</th><th class="num">Tamanho</th><th>Enviado em</th></tr></thead>
+          <tbody>
+          
+            <tr><td>boleto_aurora_nov.pdf</td><td class="num">56 KB</td><td>17/11/2026 09:12</td></tr>
+          
+            <tr><td>boleto_pinheiro.pdf</td><td class="num">48 KB</td><td>17/11/2026 09:12</td></tr>
+          
+            <tr><td>scan_horizonte.jpg</td><td class="num">112 KB</td><td>17/11/2026 09:14</td></tr>
+          
+          </tbody>
+        </table>
+      </div>
+      
+    </section>
+
+    
+    <section class="cartao cartao-aviso" aria-live="polite">
+      <h2>Fila de aprovação <span class="contador">1</span></h2>
+      <p class="vazio">1 aviso(s) aguardam decisão de uma pessoa. A aprovação é feita no terminal:
+        <code>python -m recebiveis aprovar</code>. Nada é enviado por esta tela.</p>
+    </section>
+    
+
+    <section class="cartao">
+      <h2>Boletos conhecidos <span class="contador">5</span></h2>
+      
+      <div class="tabela-rolavel">
+        <table>
+          <thead>
+            <tr><th>Situação</th><th>Identificador</th><th>Pagador</th><th>CNPJ</th>
+                <th class="num">Valor</th><th>Vencimento</th><th>Avisos</th><th>Revisão</th></tr>
+          </thead>
+          <tbody>
+          
+            <tr>
+              <td><span class="selo selo-aberto">Aberto</span>
+                  </td>
+              <td><code>3fa91c2b</code></td>
+              <td>Comercial Aurora Ltda</td>
+              <td><code>50.007.***/****-70</code></td>
+              <td class="num">R$ 1234.56</td>
+              <td>27/11/2026</td>
+              <td class="avisos"><span class="aviso aviso-aguardando_aprovacao">D-7 · aguardando aprovação</span><span class="aviso aviso-pendente">D+1 · pendente</span><span class="aviso aviso-pendente">D+3 · pendente</span></td>
+              <td class="motivos">—</td>
+            </tr>
+          
+            <tr>
+              <td><span class="selo selo-aberto">Aberto</span>
+                  </td>
+              <td><code>b7e02d41</code></td>
+              <td>Metalurgica Pinheiro SA</td>
+              <td><code>50.015.***/****-20</code></td>
+              <td class="num">R$ 399.80</td>
+              <td>13/11/2026</td>
+              <td class="avisos"><span class="aviso aviso-enviado">D-7 · enviado</span><span class="aviso aviso-pendente">D+1 · pendente</span><span class="aviso aviso-pendente">D+3 · pendente</span></td>
+              <td class="motivos">—</td>
+            </tr>
+          
+            <tr>
+              <td><span class="selo selo-aberto">Aberto</span>
+                  </td>
+              <td><code>91c4a8e0</code></td>
+              <td>Grafica Horizonte Eireli</td>
+              <td><code>50.031.***/****-93</code></td>
+              <td class="num">R$ 17.95</td>
+              <td>30/10/2026</td>
+              <td class="avisos"><span class="aviso aviso-enviado">D-7 · enviado</span><span class="aviso aviso-em_revisao">D+1 · em revisão</span><span class="aviso aviso-pendente">D+3 · pendente</span></td>
+              <td class="motivos">—</td>
+            </tr>
+          
+            <tr>
+              <td><span class="selo selo-em_revisao">Em revisão</span>
+                  </td>
+              <td><code>0d5e77ab</code></td>
+              <td>—</td>
+              <td><code>—</code></td>
+              <td class="num">R$ 1644.83</td>
+              <td>24/11/2026</td>
+              <td class="avisos">—</td>
+              <td class="motivos"><span>campo ausente: cnpj_pagador</span><span>campo ausente: nome_pagador</span></td>
+            </tr>
+          
+            <tr>
+              <td><span class="selo selo-pago">Pago</span>
+                  </td>
+              <td><code>c2a9f613</code></td>
+              <td>Servicos Delta ME</td>
+              <td><code>50.047.***/****-58</code></td>
+              <td class="num">R$ 820.00</td>
+              <td>05/11/2026</td>
+              <td class="avisos"><span class="aviso aviso-enviado">D-7 · enviado</span><span class="aviso aviso-cancelado">D+1 · cancelado</span><span class="aviso aviso-cancelado">D+3 · cancelado</span></td>
+              <td class="motivos">—</td>
+            </tr>
+          
+          </tbody>
+        </table>
+      </div>
+      
+    </section>
+  </main>
+
+  <footer class="conteudo rodape">
+    O CNPJ é exibido mascarado. Boletos em revisão não recebem aviso nem são baixados automaticamente.
+  </footer>
+<script>document.querySelectorAll("form").forEach(function(f){f.addEventListener("submit",function(e){e.preventDefault();var b=f.querySelector("button[type=submit]");if(b){setTimeout(function(){b.disabled=false;b.textContent=b.dataset.rotulo||b.textContent;},0);}});});</script>
+</body>
+</html>

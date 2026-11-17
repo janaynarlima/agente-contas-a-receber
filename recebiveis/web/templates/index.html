@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recebíveis — Entrada de boletos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <header class="topo">
+    <div class="conteudo">
+      <h1>Recebíveis</h1>
+      <p>Envie boletos para a pasta <code>entrada/</code> e acompanhe a leitura. Tudo é processado localmente; nenhum e-mail é enviado por esta tela.</p>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% if mensagens %}
+      <section class="mensagens" aria-live="polite">
+        {% for nivel, texto in mensagens %}
+          <p class="msg msg-{{ nivel }}">{{ texto }}</p>
+        {% endfor %}
+      </section>
+      {% endif %}
+    {% endwith %}
+
+    <section class="cartao">
+      <h2>Enviar boletos</h2>
+      <form id="form-envio" method="post" action="{{ url_for('enviar') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf" value="{{ csrf() }}">
+        <label id="zona" class="zona" for="arquivos">
+          <strong>Arraste os arquivos aqui</strong> ou clique para escolher
+          <span class="dica">Formatos: {{ extensoes }} · até {{ maximo_mb }} MB cada</span>
+        </label>
+        <input id="arquivos" class="oculto" type="file" name="arquivos" multiple
+               accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg">
+        <ul id="selecionados" class="lista-selecionados"></ul>
+        <label class="opcao">
+          <input type="checkbox" name="processar" value="1" checked>
+          Processar (OCR e leitura da linha digitável) logo após enviar
+        </label>
+        <button id="botao-enviar" class="botao" type="submit">Enviar</button>
+      </form>
+    </section>
+
+    <section class="cartao">
+      <div class="cabecalho-cartao">
+        <h2>Arquivos em entrada/ <span class="contador">{{ arquivos|length }}</span></h2>
+        <form method="post" action="{{ url_for('processar_entrada') }}" class="processar">
+          <input type="hidden" name="csrf" value="{{ csrf() }}">
+          <button class="botao botao-secundario" type="submit">Processar entrada</button>
+        </form>
+      </div>
+      {% if arquivos %}
+      <div class="tabela-rolavel">
+        <table>
+          <thead><tr><th>Arquivo</th><th class="num">Tamanho</th><th>Enviado em</th></tr></thead>
+          <tbody>
+          {% for a in arquivos %}
+            <tr><td>{{ a.nome }}</td><td class="num">{{ a.kb }} KB</td><td>{{ a.quando }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="vazio">Nenhum arquivo na pasta. Se havia boletos abertos, processar agora pode bloquear baixas (limite de segurança).</p>
+      {% endif %}
+    </section>
+
+    {% if em_aprovacao %}
+    <section class="cartao cartao-aviso" aria-live="polite">
+      <h2>Fila de aprovação <span class="contador">{{ em_aprovacao }}</span></h2>
+      <p class="vazio">{{ em_aprovacao }} aviso(s) aguardam decisão de uma pessoa. A aprovação é feita no terminal:
+        <code>python -m recebiveis aprovar</code>. Nada é enviado por esta tela.</p>
+    </section>
+    {% endif %}
+
+    <section class="cartao">
+      <h2>Boletos conhecidos <span class="contador">{{ boletos|length }}</span></h2>
+      {% if boletos %}
+      <div class="tabela-rolavel">
+        <table>
+          <thead>
+            <tr><th>Situação</th><th>Identificador</th><th>Pagador</th><th>CNPJ</th>
+                <th class="num">Valor</th><th>Vencimento</th><th>Avisos</th><th>Revisão</th></tr>
+          </thead>
+          <tbody>
+          {% for b in boletos %}
+            <tr>
+              <td><span class="selo selo-{{ b.status }}">{{ {'aberto':'Aberto','pago':'Pago','em_revisao':'Em revisão'}[b.status] }}</span>
+                  {% if b.requer_revisao and b.status == 'aberto' %}<span class="selo selo-em_revisao">Revisar</span>{% endif %}</td>
+              <td><code>{{ b.id_curto }}</code></td>
+              <td>{{ b.nome_pagador or '—' }}</td>
+              <td><code>{{ b.cnpj_mascarado }}</code></td>
+              <td class="num">{% if b.valor %}R$ {{ b.valor }}{% else %}—{% endif %}</td>
+              <td>{% if b.vencimento %}{{ b.vencimento[8:10] }}/{{ b.vencimento[5:7] }}/{{ b.vencimento[0:4] }}{% else %}—{% endif %}</td>
+              <td class="avisos">{% for a in b.avisos %}<span class="aviso aviso-{{ a.status }}">{{ a.tipo }} · {{ a.rotulo }}</span>{% else %}—{% endfor %}</td>
+              <td class="motivos">{% for m in b.motivos_revisao %}<span>{{ m }}</span>{% else %}—{% endfor %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="vazio">Nenhum boleto registrado ainda. Envie um arquivo e processe.</p>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer class="conteudo rodape">
+    O CNPJ é exibido mascarado. Boletos em revisão não recebem aviso nem são baixados automaticamente.
+  </footer>
+</body>
+</html>
